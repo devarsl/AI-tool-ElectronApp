@@ -15,7 +15,20 @@
             </div>
             <h1>AI Chat Dashboard</h1>
         </div>
+        <div class="ai-selector">
+            <button class="ai-btn claude active" id="claude-btn">
+                <i class="fas fa-brain"></i>
+                Claude
+            </button>
+            <button class="ai-btn gpt" id="gpt-btn">
+                <i class="fas fa-comment-dots"></i>
+                ChatGPT
+            </button>
+        </div>
         <div class="user-info">
+            <button class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
             <div class="user-avatar">U</div>
             <span class="user-name" id="user-name">User</span>
             <button class="logout-btn" id="logout-btn">
@@ -26,40 +39,11 @@
     </div>
 
     <div class="content">
-        <div class="main-content">
-            <div class="ai-selector">
-                <button class="ai-btn claude active" id="claude-btn">
-                    <i class="ai-icon fas fa-brain"></i>
-                    <span>Claude</span>
-                    <span class="indicator"></span>
-                </button>
-                <button class="ai-btn gpt" id="gpt-btn">
-                    <i class="ai-icon fas fa-comment-dots"></i>
-                    <span>ChatGPT</span>
-                    <span class="indicator"></span>
-                </button>
-            </div>
-
-            <div class="webview-container">
-                <webview id="ai-webview" src="https://claude.ai" nodeintegration></webview>
-            </div>
-
-            <div class="status-bar">
-                <div class="status-left">
-                    <span class="status-indicator"></span>
-                    <span>Connected to Claude AI</span>
-                </div>
-                <div class="status-right">
-                    <button class="theme-toggle" id="theme-toggle">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <span>v1.2.0</span>
-                </div>
-            </div>
+        <div class="webview-container">
+            <webview id="ai-webview" src="https://claude.ai" nodeintegration></webview>
         </div>
     </div>
 
-    <script src="./home-renderer.js">
-    </script>
+    <script src="./home-renderer.js"></script>
 </body>
 </html>
