@@ -94,19 +94,17 @@ body {
 
 .logout-btn {
     background-color: var(--card-bg);
-    border: 1px solid var(--shadow-color-dark);
     padding: 8px 14px;
     border-radius: 12px;
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: 8px;
+    color: var(--text-color);
     cursor: pointer;
+    border: 1px solid var(--text-color);
 }
 
-.logout-btn:hover {
-    background-color: #f1f5f9;
-}
 
 .content {
     flex: 1;
@@ -152,18 +150,46 @@ body {
     background-color: rgba(0, 0, 0, 0.03);
 }
 
-.webview-container {
+/* .webview-container {
     flex: 1;
     overflow: hidden;
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
     box-shadow: 0 4px 16px var(--shadow-color-dark);
-}
-
-#ai-webview {
+} */
+.webview-container {
+    position: relative;
     width: 100%;
     height: 100%;
-    border: none;
+    flex: 1;
+    overflow: hidden;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 16px var(--shadow-color-dark);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 16px var(--shadow-color-dark);
+}
+
+
+#claude-webview,
+#gpt-webview {
+    flex:1;
+    height: 100%;
+}
+#ai-webview {
+
+    height: 100%;
+    border:none;
+}
+.badge {
+  display: inline-block;
+  background-color: #e2e8f0; /* light gray */
+  color: #1a202c; /* dark gray text */
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px; /* pill shape */
+  line-height: 1;
 }
 
 .status-bar {
@@ -190,4 +216,65 @@ body {
     .content {
         padding: 16px;
     }
+}
+
+/* Add this to your existing home.css file */
+
+.status-bar {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--shadow-color-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    z-index: 1000;
+}
+
+.status-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-indicator {
+    font-size: 8px;
+    color: #10b981; /* Green for connected */
+}
+
+.status-indicator.disconnected {
+    color: #ef4444; /* Red for disconnected */
+}
+
+.status-indicator.loading {
+    color: #f59e0b; /* Yellow for loading */
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.status-right {
+    font-weight: 500;
+}
+
+/* Adjust content to account for status bar */
+.content {
+    height: calc(100vh - 80px - 30px); /* header height - status bar height */
+}
+
+.webview-container {
+    height: 100%;
+}
+
+#ai-webview {
+    width: 100%;
+    height: 100%;
 }

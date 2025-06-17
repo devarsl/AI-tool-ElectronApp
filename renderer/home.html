@@ -1,3 +1,4 @@
+<!-- new version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,7 @@
     <title>AI Chat Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./styles/home.css">
+    <link rel="stylesheet" href="./styles/updater.css">
 </head>
 <body>
     <div class="header">
@@ -14,6 +16,7 @@
                 <i class="fas fa-robot"></i>
             </div>
             <h1>AI Chat Dashboard</h1>
+            <span class="badge">v 2.0.0</span>
         </div>
         <div class="ai-selector">
             <button class="ai-btn claude active" id="claude-btn">
@@ -39,11 +42,27 @@
     </div>
 
     <div class="content">
-        <div class="webview-container">
+        <!-- <div class="webview-container">
             <webview id="ai-webview" src="https://claude.ai" nodeintegration></webview>
+        </div> -->
+        <!-- Replace the single webview with these two -->
+        <div class="webview-container">
+            <webview id="claude-webview" src="https://claude.ai" nodeintegration style="display: block;"></webview>
+            <webview id="gpt-webview" src="about:blank" nodeintegration style="display: none;"></webview>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-left">
+            <i class="fas fa-circle status-indicator"></i>
+            <span>Connected to Claude AI</span>
+        </div>
+        <div class="status-right">
+            <span id="connection-status">Ready</span>
         </div>
     </div>
 
     <script src="./home-renderer.js"></script>
+    <script src="./updater.js"></script>
 </body>
 </html>

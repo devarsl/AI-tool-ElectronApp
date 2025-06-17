@@ -1,15 +1,4 @@
-const { ipcRenderer } = require('electron');
-
-// Tab switching functionality
-document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
-        
-        tab.classList.add('active');
-        document.getElementById(`${tab.dataset.form}Form`).classList.add('active');
-    });
-});
+// renderer/renderer.js
 
 // Snackbar utility
 function showSnackbar(message, isError = false) {
@@ -57,11 +46,11 @@ loginForm.addEventListener('submit', async (e) => {
     };
 
     try {
-        const result = await ipcRenderer.invoke('login-user', loginData);
+        const result = await window.electronAPI.loginUser(loginData);
         if (result.success) {
             showSnackbar('Login successful! Redirecting...');
             setTimeout(() => {
-                ipcRenderer.send('navigate-to-home', { user: result.user });
+                window.electronAPI.navigateToHome({ user: result.user });
             }, 1000);
         } else {
             showSnackbar(result.message || 'Login failed. Please check your credentials.', true);
@@ -73,36 +62,48 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Handle signup form submission
-document.getElementById('signup-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
+// Add helpful hint for demo credentials
+document.addEventListener('DOMContentLoaded', () => {
+    // You can uncomment this to show demo credentials on page load
+    // showSnackbar('Demo: usman@bxtrack.com / 123usman', false);
     
-    const password = document.getElementById('signup-password').value;
-    const confirmPassword = document.getElementById('signup-confirm-password').value;
-    
-    if (password !== confirmPassword) {
-        showStatus('Passwords do not match!', true);
-        return;
-    }
-    
-    const userData = {
-        name: document.getElementById('signup-name').value,
-        email: document.getElementById('signup-email').value,
-        password: password,
-        type: 'manual'
-    };
-
-    try {
-        const result = await ipcRenderer.invoke('register-user', userData);
-        if (result.success) {
-            showStatus('Account created successfully! Please login.');
-            // Reset form and switch to login tab
-            e.target.reset();
-            document.querySelector('[data-form="login"]').click();
-        } else {
-            showStatus(result.message || 'Failed to create account.', true);
-        }
-    } catch (error) {
-        showStatus('Registration failed: ' + error.message, true);
-    }
+    // Initialize password toggle functionality
+    initPasswordToggle();
 });
+
+// Password show/hide functionality
+function initPasswordToggle() {
+    const passwordInput = document.getElementById('login-password');
+    const passwordToggle = document.getElementById('password-toggle');
+    
+    if (passwordInput && passwordToggle) {
+        passwordToggle.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            
+            // Toggle input type
+            passwordInput.type = isPassword ? 'text' : 'password';
+            
+            // Toggle visual state
+            passwordToggle.classList.toggle('hidden', !isPassword);
+            
+            // Update icon
+            const eyeIcon = passwordToggle.querySelector('.eye-icon');
+            if (isPassword) {
+                // Show "eye-off" icon when password is visible
+                eyeIcon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                `;
+            } else {
+                // Show normal "eye" icon when password is hidden
+                eyeIcon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            }
+            
+            // Keep focus on input
+            passwordInput.focus();
+        });
+    }
+}
