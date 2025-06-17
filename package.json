@@ -1,6 +1,6 @@
 {
     "name": "ai-chat-assistant",
-    "version": "2.0.0",
+    "version": "1.0.0",
     "description": "AI Chat Assistant with Claude and ChatGPT",
     "main": "main/main.js",
     "homepage": "https://github.com/devarsl/AI-tool-ElectronApp",

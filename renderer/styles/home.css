@@ -103,9 +103,14 @@ body {
     color: var(--text-color);
     cursor: pointer;
     border: 1px solid var(--text-color);
+    transition: .3s;
 }
-
-
+.logout-btn:hover{
+    scale: 1.1;
+}
+.logout-btn:active{
+    scale:0.8;
+}
 .content {
     flex: 1;
     padding: 24px;
