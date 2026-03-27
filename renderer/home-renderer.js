@@ -330,8 +330,191 @@ function handleRestrictedAccess(webview, blockedUrl) {
 }
 
 // Setup URL blocking for webview
+// function setupUrlBlocking(webview) {
+//     let blockingInProgress = false; // Prevent concurrent blocking attempts
+
+//     // Unified blocking handler
+//     function handleBlockedUrl(url, eventType) {
+//         if (blockingInProgress) {
+//             console.log(`Blocking already in progress for ${url}, skipping ${eventType}`);
+//             return false;
+//         }
+
+//         if (isRestrictedUrl(url)) {
+//             console.log(`Blocking ${eventType} to restricted URL: ${url}`);
+//             blockingInProgress = true;
+
+//             handleRestrictedAccess(webview, url);
+
+//             // Reset blocking flag after handling
+//             setTimeout(() => {
+//                 blockingInProgress = false;
+//             }, 2000);
+
+//             return true;
+//         }
+
+//         return false;
+//     }
+
+//     // Block navigation to restricted URLs
+//     webview.addEventListener('will-navigate', (event) => {
+//         const url = event.url;
+//         console.log(`Navigation attempt to: ${url}`);
+
+//         if (handleBlockedUrl(url, 'will-navigate')) {
+//             event.preventDefault();
+//         }
+//     });
+
+//     // Block new window requests
+//     webview.addEventListener('new-window', (event) => {
+//         const url = event.url;
+//         console.log(`New window request to: ${url}`);
+
+//         if (handleBlockedUrl(url, 'new-window')) {
+//             event.preventDefault();
+//         }
+//     });
+
+//     // Monitor page loads - reduced frequency checking
+//     webview.addEventListener('did-finish-load', () => {
+//         setTimeout(() => {
+//             const currentUrl = webview.getURL();
+
+//             if (handleBlockedUrl(currentUrl, 'did-finish-load')) {
+//                 return;
+//             }
+
+//             // Inject JavaScript to monitor client-side navigation
+//             if (webview === gptWebview && currentAI === 'gpt') {
+//                 injectNavigationBlocker(webview);
+//             }
+//         }, 1000); // Delay to avoid conflicts
+//     });
+
+//     // Monitor in-page navigation with debouncing
+//     let inPageNavigationTimeout;
+//     webview.addEventListener('did-navigate-in-page', (event) => {
+//         clearTimeout(inPageNavigationTimeout);
+//         inPageNavigationTimeout = setTimeout(() => {
+//             const url = event.url;
+//             console.log(`In-page navigation to: ${url}`);
+
+//             handleBlockedUrl(url, 'did-navigate-in-page');
+//         }, 500); // Debounce in-page navigation
+//     });
+// }
+
+// // Modified injection script with alerts enabled
+// function injectNavigationBlocker(webview) {
+//     const injectionScript = `
+//         (function() {
+//             // Check if already injected to prevent duplicates
+//             if (window.navigationBlockerInjected) {
+//                 console.log('Navigation blocker already injected, skipping');
+//                 return;
+//             }
+//             window.navigationBlockerInjected = true;
+
+//             console.log('Navigation blocker injected into ChatGPT');
+
+//             // Define restricted URL patterns
+//             const restrictedPatterns = [
+//                 'sora.chatgpt.com',
+//                 'chatgpt.com/gpts',
+//                 'chat.openai.com/gpts',
+//                 'sora.openai.com',
+//                 'openai.com/sora',
+//                 'chatgpt.com/g/',
+//                 'chat.openai.com/g/'
+//             ];
+
+//             function isRestrictedUrl(url) {
+//                 return restrictedPatterns.some(pattern => url.includes(pattern));
+//             }
+
+//             // Function to show alert and redirect
+//             function showRestrictionAlert(url) {
+//                 // Create a simple alert first
+//                 alert('Access to this page is restricted: ' + url + '\\n\\nYou will be redirected to the main ChatGPT page.');
+
+//                 // Then redirect
+//                 setTimeout(() => {
+//                     window.location.href = 'https://chatgpt.com/';
+//                 }, 100);
+//             }
+
+//             // Check current URL and block if restricted
+//             function blockRestrictedNavigation() {
+//                 if (isRestrictedUrl(window.location.href)) {
+//                     console.log('Client-side: Restricted page detected:', window.location.href);
+//                     showRestrictionAlert(window.location.href);
+//                     return true;
+//                 }
+//                 return false;
+//             }
+
+//             // Override navigation methods
+//             const originalPushState = history.pushState;
+//             const originalReplaceState = history.replaceState;
+
+//             history.pushState = function(state, title, url) {
+//                 if (url && isRestrictedUrl(url)) {
+//                     console.log('Client-side: Blocking pushState to restricted URL:', url);
+//                     showRestrictionAlert(url);
+//                     return;
+//                 }
+//                 return originalPushState.apply(history, arguments);
+//             };
+
+//             history.replaceState = function(state, title, url) {
+//                 if (url && isRestrictedUrl(url)) {
+//                     console.log('Client-side: Blocking replaceState to restricted URL:', url);
+//                     showRestrictionAlert(url);
+//                     return;
+//                 }
+//                 return originalReplaceState.apply(history, arguments);
+//             };
+
+//             // Monitor popstate events (back/forward navigation)
+//             window.addEventListener('popstate', function(event) {
+//                 console.log('popstate event, checking URL...');
+//                 setTimeout(blockRestrictedNavigation, 100);
+//             });
+
+//             // Intercept link clicks with alerts
+//             document.addEventListener('click', function(event) {
+//                 const link = event.target.closest('a');
+//                 if (link && link.href && isRestrictedUrl(link.href)) {
+//                     console.log('Client-side: Blocking click on restricted link:', link.href);
+//                     event.preventDefault();
+//                     event.stopPropagation();
+//                     showRestrictionAlert(link.href);
+//                     return false;
+//                 }
+//             }, true);
+
+//             // Periodic checking with reduced frequency
+//             setInterval(blockRestrictedNavigation, 5000); // Every 5 seconds
+
+//             // Initial check with delay
+//             setTimeout(blockRestrictedNavigation, 2000);
+
+//             console.log('Navigation blocker setup complete (client-side with alerts)');
+//         })();
+//     `;
+
+//     webview.executeJavaScript(injectionScript)
+//         .then(() => {
+//             console.log('Navigation blocker injected successfully');
+//         })
+//         .catch(err => {
+//             console.error('Failed to inject navigation blocker:', err);
+//         });
+// }
 function setupUrlBlocking(webview) {
-    let blockingInProgress = false; // Prevent concurrent blocking attempts
+    let blockingInProgress = false;
 
     // Unified blocking handler
     function handleBlockedUrl(url, eventType) {
@@ -346,7 +529,6 @@ function setupUrlBlocking(webview) {
 
             handleRestrictedAccess(webview, url);
 
-            // Reset blocking flag after handling
             setTimeout(() => {
                 blockingInProgress = false;
             }, 2000);
@@ -367,17 +549,31 @@ function setupUrlBlocking(webview) {
         }
     });
 
-    // Block new window requests
+    // Enhanced new-window blocking for middle-clicks and Ctrl+clicks
     webview.addEventListener('new-window', (event) => {
         const url = event.url;
-        console.log(`New window request to: ${url}`);
+        console.log(`New window request to: ${url} (disposition: ${event.disposition})`);
 
+        // Block ALL new window requests to restricted URLs
+        // This includes middle-click, Ctrl+click, right-click -> "Open in new tab", etc.
         if (handleBlockedUrl(url, 'new-window')) {
             event.preventDefault();
+            return;
+        }
+
+        // Optional: Block all new window requests entirely for ChatGPT
+        if (webview === gptWebview) {
+            console.log(`Blocking new window request for ChatGPT: ${url}`);
+            event.preventDefault();
+
+            // If it's not a restricted URL, navigate in the same window instead
+            if (!isRestrictedUrl(url)) {
+                webview.src = url;
+            }
         }
     });
 
-    // Monitor page loads - reduced frequency checking
+    // Monitor page loads
     webview.addEventListener('did-finish-load', () => {
         setTimeout(() => {
             const currentUrl = webview.getURL();
@@ -386,11 +582,11 @@ function setupUrlBlocking(webview) {
                 return;
             }
 
-            // Inject JavaScript to monitor client-side navigation
+            // Inject enhanced JavaScript blocker
             if (webview === gptWebview && currentAI === 'gpt') {
-                injectNavigationBlocker(webview);
+                injectEnhancedNavigationBlocker(webview);
             }
-        }, 1000); // Delay to avoid conflicts
+        }, 1000);
     });
 
     // Monitor in-page navigation with debouncing
@@ -400,24 +596,48 @@ function setupUrlBlocking(webview) {
         inPageNavigationTimeout = setTimeout(() => {
             const url = event.url;
             console.log(`In-page navigation to: ${url}`);
-
             handleBlockedUrl(url, 'did-navigate-in-page');
-        }, 500); // Debounce in-page navigation
+        }, 500);
     });
+
+    // Additional security: Monitor webContents if available
+    if (webview.getWebContents) {
+        const webContents = webview.getWebContents();
+
+        // Block window.open calls
+        webContents.setWindowOpenHandler(({ url, disposition }) => {
+            console.log(`Window open handler: ${url} (disposition: ${disposition})`);
+
+            if (isRestrictedUrl(url)) {
+                console.log(`Blocking window.open to restricted URL: ${url}`);
+                handleRestrictedAccess(webview, url);
+                return { action: 'deny' };
+            }
+
+            // For ChatGPT, redirect instead of opening new window
+            if (webview === gptWebview) {
+                console.log(`Redirecting instead of opening new window: ${url}`);
+                webview.src = url;
+                return { action: 'deny' };
+            }
+
+            return { action: 'allow' };
+        });
+    }
 }
 
-// Modified injection script with alerts enabled
-function injectNavigationBlocker(webview) {
+// Enhanced injection script with comprehensive click blocking
+function injectEnhancedNavigationBlocker(webview) {
     const injectionScript = `
         (function() {
             // Check if already injected to prevent duplicates
-            if (window.navigationBlockerInjected) {
-                console.log('Navigation blocker already injected, skipping');
+            if (window.enhancedNavigationBlockerInjected) {
+                console.log('Enhanced navigation blocker already injected, skipping');
                 return;
             }
-            window.navigationBlockerInjected = true;
+            window.enhancedNavigationBlockerInjected = true;
             
-            console.log('Navigation blocker injected into ChatGPT');
+            console.log('Enhanced navigation blocker injected into ChatGPT');
             
             // Define restricted URL patterns
             const restrictedPatterns = [
@@ -427,7 +647,10 @@ function injectNavigationBlocker(webview) {
                 'sora.openai.com',
                 'openai.com/sora',
                 'chatgpt.com/g/',
-                'chat.openai.com/g/'
+                'chat.openai.com/g/',
+                'operator.chatgpt.com',
+                'chatgpt.com/library',
+                'chatgpt.com/codex'
             ];
             
             function isRestrictedUrl(url) {
@@ -436,10 +659,8 @@ function injectNavigationBlocker(webview) {
             
             // Function to show alert and redirect
             function showRestrictionAlert(url) {
-                // Create a simple alert first
                 alert('Access to this page is restricted: ' + url + '\\n\\nYou will be redirected to the main ChatGPT page.');
                 
-                // Then redirect
                 setTimeout(() => {
                     window.location.href = 'https://chatgpt.com/';
                 }, 100);
@@ -458,6 +679,7 @@ function injectNavigationBlocker(webview) {
             // Override navigation methods
             const originalPushState = history.pushState;
             const originalReplaceState = history.replaceState;
+            const originalOpen = window.open;
             
             history.pushState = function(state, title, url) {
                 if (url && isRestrictedUrl(url)) {
@@ -476,42 +698,156 @@ function injectNavigationBlocker(webview) {
                 }
                 return originalReplaceState.apply(history, arguments);
             };
+
+            // Override window.open to block restricted URLs
+            window.open = function(url, target, features) {
+                if (url && isRestrictedUrl(url)) {
+                    console.log('Client-side: Blocking window.open to restricted URL:', url);
+                    showRestrictionAlert(url);
+                    return null;
+                }
+                
+                // For non-restricted URLs, still prevent new windows and navigate in same window
+                if (url && !url.startsWith('javascript:') && !url.startsWith('#')) {
+                    console.log('Client-side: Redirecting window.open to same window:', url);
+                    window.location.href = url;
+                    return null;
+                }
+                
+                return originalOpen.apply(window, arguments);
+            };
             
-            // Monitor popstate events (back/forward navigation)
+            // Monitor popstate events
             window.addEventListener('popstate', function(event) {
                 console.log('popstate event, checking URL...');
                 setTimeout(blockRestrictedNavigation, 100);
             });
             
-            // Intercept link clicks with alerts
+            // Enhanced click event handler for ALL mouse buttons
+            document.addEventListener('mousedown', function(event) {
+                const link = event.target.closest('a');
+                if (link && link.href) {
+                    // Check for any mouse button click (left=0, middle=1, right=2)
+                    if (isRestrictedUrl(link.href)) {
+                        console.log('Client-side: Blocking mouse click on restricted link:', link.href, 'Button:', event.button);
+                        event.preventDefault();
+                        event.stopPropagation();
+                        event.stopImmediatePropagation();
+                        showRestrictionAlert(link.href);
+                        return false;
+                    }
+                    
+                    // For middle-click (button 1) on non-restricted links, prevent new tab
+                    if (event.button === 1) {
+                        console.log('Client-side: Converting middle-click to same-window navigation:', link.href);
+                        event.preventDefault();
+                        event.stopPropagation();
+                        window.location.href = link.href;
+                        return false;
+                    }
+                    
+                    // For Ctrl+Click, also prevent new tab
+                    if (event.ctrlKey && event.button === 0) {
+                        console.log('Client-side: Converting Ctrl+click to same-window navigation:', link.href);
+                        event.preventDefault();
+                        event.stopPropagation();
+                        window.location.href = link.href;
+                        return false;
+                    }
+                }
+            }, true);
+            
+            // Additional click handler for complete coverage
             document.addEventListener('click', function(event) {
                 const link = event.target.closest('a');
                 if (link && link.href && isRestrictedUrl(link.href)) {
-                    console.log('Client-side: Blocking click on restricted link:', link.href);
+                    console.log('Client-side: Blocking click on restricted link (click event):', link.href);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    showRestrictionAlert(link.href);
+                    return false;
+                }
+            }, true);
+
+            // Context menu prevention on restricted links
+            document.addEventListener('contextmenu', function(event) {
+                const link = event.target.closest('a');
+                if (link && link.href && isRestrictedUrl(link.href)) {
+                    console.log('Client-side: Blocking context menu on restricted link:', link.href);
                     event.preventDefault();
                     event.stopPropagation();
                     showRestrictionAlert(link.href);
                     return false;
                 }
-            }, true);
+            });
+
+            // Prevent keyboard navigation to restricted links
+            document.addEventListener('keydown', function(event) {
+                // Check for Enter key on focused links
+                if (event.key === 'Enter' || event.key === ' ') {
+                    const focusedElement = document.activeElement;
+                    if (focusedElement && focusedElement.tagName === 'A' && focusedElement.href) {
+                        if (isRestrictedUrl(focusedElement.href)) {
+                            console.log('Client-side: Blocking keyboard navigation to restricted link:', focusedElement.href);
+                            event.preventDefault();
+                            event.stopPropagation();
+                            showRestrictionAlert(focusedElement.href);
+                            return false;
+                        }
+                    }
+                }
+            });
+            
+            // Override addEventListener to catch dynamically added event listeners
+            const originalAddEventListener = Element.prototype.addEventListener;
+            Element.prototype.addEventListener = function(type, listener, options) {
+                if (type === 'click' && this.tagName === 'A' && this.href && isRestrictedUrl(this.href)) {
+                    console.log('Client-side: Preventing event listener on restricted link:', this.href);
+                    return;
+                }
+                return originalAddEventListener.call(this, type, listener, options);
+            };
             
             // Periodic checking with reduced frequency
-            setInterval(blockRestrictedNavigation, 5000); // Every 5 seconds
+            setInterval(blockRestrictedNavigation, 5000);
             
             // Initial check with delay
             setTimeout(blockRestrictedNavigation, 2000);
             
-            console.log('Navigation blocker setup complete (client-side with alerts)');
+            console.log('Enhanced navigation blocker setup complete (comprehensive click protection)');
         })();
     `;
 
     webview.executeJavaScript(injectionScript)
         .then(() => {
-            console.log('Navigation blocker injected successfully');
+            console.log('Enhanced navigation blocker injected successfully');
         })
         .catch(err => {
-            console.error('Failed to inject navigation blocker:', err);
+            console.error('Failed to inject enhanced navigation blocker:', err);
         });
+}
+function setWebviewSecuritySettings(webview) {
+    // Set webview attributes for enhanced security
+    webview.nodeintegration = false;
+    webview.websecurity = true;
+    webview.allowpopups = false; // This is crucial for blocking popups
+    webview.contextmenu = false; // Disable context menu to prevent "Open in new tab"
+    
+    // Set additional webview preferences via webContents
+    webview.addEventListener('dom-ready', () => {
+        const webContents = webview.getWebContents();
+        if (webContents) {
+            // Disable new window creation
+            webContents.on('new-window', (event) => {
+                event.preventDefault();
+            });
+        }
+    });
+}
+function initializeEnhancedWebview(webview) {
+    setWebviewSecuritySettings(webview);
+    setupUrlBlocking(webview);
 }
 
 // Function to hide ChatGPT sidebar elements
@@ -537,7 +873,7 @@ function injectNavigationBlocker(webview) {
 //             '//div[text()="Sora"]/../..',
 //             '//div[text()="GPTs"]/../..'
 //           ];
-          
+
 //           xpathsToHide.forEach(xpath => {
 //             hideElementByText(xpath);
 //           });
@@ -897,12 +1233,12 @@ window.urlBlockingAPI = {
     getRestrictedUrls: () => [...RESTRICTED_URLS] // Return copy of array
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Add update check button to header (optional)
     addUpdateCheckButton();
-    
+
     // Add keyboard shortcut for checking updates
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.ctrlKey && e.shiftKey && e.key === 'U') {
             e.preventDefault();
             if (window.appUpdater) {
@@ -919,13 +1255,13 @@ function addUpdateCheckButton() {
         updateButton.className = 'update-check-btn';
         updateButton.title = 'Check for Updates (Ctrl+Shift+U)';
         updateButton.innerHTML = '<i class="fas fa-sync-alt"></i>';
-        
+
         updateButton.addEventListener('click', () => {
             if (window.appUpdater) {
                 window.appUpdater.manualCheckForUpdates();
             }
         });
-        
+
         // Insert before theme toggle
         const themeToggle = document.getElementById('theme-toggle');
         userInfo.insertBefore(updateButton, themeToggle);
